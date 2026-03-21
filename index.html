@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ButugiriButuri — 物理学ノート</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ヘッダー -->
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="site-logo">ButugiriButuri</a>
+      <nav class="site-nav">
+        <a href="index.html" class="active">ホーム</a>
+        <a href="articles.html">記事一覧</a>
+        <a href="about.html">About</a>
+      </nav>
+      <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">
+        <span class="icon-sun">☀</span>
+        <span class="icon-moon">☽</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ヒーロー -->
+  <section class="hero">
+    <div class="container">
+      <h1>物理学を、<br>シンプルに。</h1>
+      <p class="hero-sub">数式と直感で理解する物理学ノート</p>
+    </div>
+  </section>
+
+  <!-- カテゴリ一覧 -->
+  <section class="categories">
+    <div class="container">
+      <h2 class="section-title">カテゴリ</h2>
+      <div class="category-grid">
+        <a href="articles.html#mechanics" class="category-card">
+          <span class="category-icon">⟳</span>
+          <h3>力学</h3>
+          <p>ニュートン力学・解析力学</p>
+        </a>
+        <a href="articles.html#electromagnetism" class="category-card">
+          <span class="category-icon">⚡</span>
+          <h3>電磁気学</h3>
+          <p>マクスウェル方程式・電磁波</p>
+        </a>
+        <a href="articles.html#thermodynamics" class="category-card">
+          <span class="category-icon">∿</span>
+          <h3>熱力学</h3>
+          <p>エントロピー・統計力学</p>
+        </a>
+        <a href="articles.html#quantum" class="category-card">
+          <span class="category-icon">ψ</span>
+          <h3>量子力学</h3>
+          <p>シュレーディンガー方程式・量子状態</p>
+        </a>
+        <a href="articles.html#relativity" class="category-card">
+          <span class="category-icon">✶</span>
+          <h3>相対性理論</h3>
+          <p>特殊相対論・一般相対論</p>
+        </a>
+        <a href="articles.html#math" class="category-card">
+          <span class="category-icon">∫</span>
+          <h3>数理物理</h3>
+          <p>物理のための数学</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 最新記事（サンプル） -->
+  <section class="recent-articles">
+    <div class="container">
+      <h2 class="section-title">最新の記事</h2>
+      <div class="article-list">
+
+        <article class="article-card">
+          <span class="article-tag">力学</span>
+          <h3><a href="articles/sample-newton.html">ニュートンの運動方程式を読み解く</a></h3>
+          <p>F = ma の意味を丁寧に掘り下げる。力・質量・加速度の関係を数式と図で整理。</p>
+          <time>2026-03-21</time>
+        </article>
+
+        <article class="article-card">
+          <span class="article-tag">電磁気学</span>
+          <h3><a href="articles/sample-maxwell.html">マクスウェル方程式の全体像</a></h3>
+          <p>4つの方程式が電磁気現象をどう記述するか、微分形と積分形を並べて解説。</p>
+          <time>2026-03-20</time>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- フッター -->
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 ButugiriButuri</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>マクスウェル方程式の全体像 — ButugiriButuri</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="../index.html" class="site-logo">ButugiriButuri</a>
+      <nav class="site-nav">
+        <a href="../index.html">ホーム</a>
+        <a href="../articles.html" class="active">記事一覧</a>
+        <a href="../about.html">About</a>
+      </nav>
+      <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">
+        <span class="icon-sun">☀</span>
+        <span class="icon-moon">☽</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="article-header">
+      <h1>マクスウェル方程式の全体像</h1>
+      <div class="article-meta">
+        <span>電磁気学</span>
+        <time>2026-03-20</time>
+      </div>
+    </div>
+
+    <div class="article-body">
+
+      <h2>4つの方程式</h2>
+      <p>マクスウェル方程式は、電磁気学の全現象を4つの式で記述する。微分形式で書くと次の通り。</p>
+
+      <div class="math-block">
+        $$\nabla \cdot \vec{E} = \frac{\rho}{\varepsilon_0}$$
+      </div>
+      <p><strong>ガウスの法則</strong> — 電荷が電場の源であることを示す。</p>
+
+      <div class="math-block">
+        $$\nabla \cdot \vec{B} = 0$$
+      </div>
+      <p><strong>磁場のガウスの法則</strong> — 磁気単極子（モノポール）は存在しないことを表す。</p>
+
+      <div class="math-block">
+        $$\nabla \times \vec{E} = -\frac{\partial \vec{B}}{\partial t}$$
+      </div>
+      <p><strong>ファラデーの法則</strong> — 時間変化する磁場が電場を誘導する。</p>
+
+      <div class="math-block">
+        $$\nabla \times \vec{B} = \mu_0 \vec{J} + \mu_0 \varepsilon_0 \frac{\partial \vec{E}}{\partial t}$$
+      </div>
+      <p><strong>アンペール-マクスウェルの法則</strong> — 電流と変位電流が磁場を生成する。</p>
+
+      <h2>電磁波の導出</h2>
+      <p>真空中（$\rho = 0$, $\vec{J} = 0$）では、上の4式から電場・磁場がそれぞれ波動方程式を満たすことが導ける。</p>
+
+      <div class="derivation">
+        <div class="step">
+          <div class="step-label">Step 1 — ファラデーの法則の回転をとる</div>
+          <div class="math-block">$$\nabla \times (\nabla \times \vec{E}) = -\frac{\partial}{\partial t}(\nabla \times \vec{B})$$</div>
+        </div>
+        <div class="step">
+          <div class="step-label">Step 2 — ベクトル恒等式と真空のアンペール則を代入</div>
+          <div class="math-block">$$\nabla(\nabla \cdot \vec{E}) - \nabla^2 \vec{E} = -\mu_0 \varepsilon_0 \frac{\partial^2 \vec{E}}{\partial t^2}$$</div>
+        </div>
+        <div class="step">
+          <div class="step-label">Step 3 — 真空でのガウスの法則 $\nabla \cdot \vec{E} = 0$ を使う</div>
+          <div class="math-block">$$\nabla^2 \vec{E} = \mu_0 \varepsilon_0 \frac{\partial^2 \vec{E}}{\partial t^2}$$</div>
+        </div>
+      </div>
+
+      <p>これは波動方程式であり、電磁波の速度は</p>
+
+      <div class="math-block">
+        $$c = \frac{1}{\sqrt{\mu_0 \varepsilon_0}} \approx 3.0 \times 10^8 \; \text{m/s}$$
+      </div>
+
+      <div class="note">
+        <div class="note-title">歴史的意義</div>
+        <p>マクスウェルがこの速度を計算し、光速と一致することを発見したことで、光が電磁波であることが示された。これは物理学史上最も美しい統一の一つである。</p>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 ButugiriButuri</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <script src="../js/main.js"></script>
+</body>
+</html>

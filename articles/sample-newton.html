@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ニュートンの運動方程式を読み解く — ButugiriButuri</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="../index.html" class="site-logo">ButugiriButuri</a>
+      <nav class="site-nav">
+        <a href="../index.html">ホーム</a>
+        <a href="../articles.html" class="active">記事一覧</a>
+        <a href="../about.html">About</a>
+      </nav>
+      <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">
+        <span class="icon-sun">☀</span>
+        <span class="icon-moon">☽</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="article-header">
+      <h1>ニュートンの運動方程式を読み解く</h1>
+      <div class="article-meta">
+        <span>力学</span>
+        <time>2026-03-21</time>
+      </div>
+    </div>
+
+    <div class="article-body">
+
+      <h2>運動方程式とは</h2>
+      <p>ニュートンの第二法則は、力と運動の関係を定量的に記述する。最も基本的な形は次の通り。</p>
+
+      <div class="math-block">
+        $$\vec{F} = m\vec{a}$$
+      </div>
+
+      <p>ここで $\vec{F}$ は物体に作用する合力、$m$ は質量、$\vec{a}$ は加速度である。</p>
+
+      <h2>微分形式での記述</h2>
+      <p>加速度は速度の時間微分、速度は位置の時間微分であるから、運動方程式は次のように書き直せる。</p>
+
+      <div class="math-block">
+        $$\vec{F} = m\frac{d^2\vec{r}}{dt^2}$$
+      </div>
+
+      <p>これは位置ベクトル $\vec{r}(t)$ に関する2階常微分方程式である。初期位置 $\vec{r}(0)$ と初速度 $\dot{\vec{r}}(0)$ を与えれば、原理的に任意の時刻の運動を決定できる。</p>
+
+      <h2>具体例：自由落下</h2>
+      <p>重力のみが働く場合を考える。鉛直下向きを正にとると、</p>
+
+      <div class="derivation">
+        <div class="step">
+          <div class="step-label">Step 1 — 運動方程式を立てる</div>
+          <div class="math-block">$$ma = mg$$</div>
+        </div>
+        <div class="step">
+          <div class="step-label">Step 2 — 両辺を m で割る</div>
+          <div class="math-block">$$a = g$$</div>
+        </div>
+        <div class="step">
+          <div class="step-label">Step 3 — 積分して速度を求める</div>
+          <div class="math-block">$$v(t) = v_0 + gt$$</div>
+        </div>
+        <div class="step">
+          <div class="step-label">Step 4 — さらに積分して位置を求める</div>
+          <div class="math-block">$$x(t) = x_0 + v_0 t + \frac{1}{2}gt^2$$</div>
+        </div>
+      </div>
+
+      <div class="note">
+        <div class="note-title">補足</div>
+        <p>空気抵抗を無視すれば、質量に依存せず全ての物体が同じ加速度で落下する。これがガリレオの実験の本質である。</p>
+      </div>
+
+      <h2>運動量による表現</h2>
+      <p>運動量 $\vec{p} = m\vec{v}$ を用いると、ニュートンの運動方程式はより一般的な形で書ける。</p>
+
+      <div class="math-block">
+        $$\vec{F} = \frac{d\vec{p}}{dt}$$
+      </div>
+
+      <p>この形式は質量が時間変化する系（ロケットの推進など）にも適用でき、より基本的な表現と言える。</p>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 ButugiriButuri</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <script src="../js/main.js"></script>
+</body>
+</html>

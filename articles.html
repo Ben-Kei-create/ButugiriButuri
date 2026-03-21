@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>記事一覧 — ButugiriButuri</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="site-logo">ButugiriButuri</a>
+      <nav class="site-nav">
+        <a href="index.html">ホーム</a>
+        <a href="articles.html" class="active">記事一覧</a>
+        <a href="about.html">About</a>
+      </nav>
+      <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">
+        <span class="icon-sun">☀</span>
+        <span class="icon-moon">☽</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="articles-index">
+      <h1>記事一覧</h1>
+
+      <h2 id="mechanics">力学</h2>
+      <div class="article-list">
+        <article class="article-card">
+          <span class="article-tag">力学</span>
+          <h3><a href="articles/sample-newton.html">ニュートンの運動方程式を読み解く</a></h3>
+          <p>F = ma の意味を丁寧に掘り下げる。力・質量・加速度の関係を数式と図で整理。</p>
+          <time>2026-03-21</time>
+        </article>
+      </div>
+
+      <h2 id="electromagnetism">電磁気学</h2>
+      <div class="article-list">
+        <article class="article-card">
+          <span class="article-tag">電磁気学</span>
+          <h3><a href="articles/sample-maxwell.html">マクスウェル方程式の全体像</a></h3>
+          <p>4つの方程式が電磁気現象をどう記述するか、微分形と積分形を並べて解説。</p>
+          <time>2026-03-20</time>
+        </article>
+      </div>
+
+      <h2 id="thermodynamics">熱力学</h2>
+      <div class="article-list">
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">記事準備中</p>
+      </div>
+
+      <h2 id="quantum">量子力学</h2>
+      <div class="article-list">
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">記事準備中</p>
+      </div>
+
+      <h2 id="relativity">相対性理論</h2>
+      <div class="article-list">
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">記事準備中</p>
+      </div>
+
+      <h2 id="math">数理物理</h2>
+      <div class="article-list">
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">記事準備中</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 ButugiriButuri</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
