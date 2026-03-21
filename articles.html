@@ -9,6 +9,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    .empty-category { color: var(--text-secondary); font-size: 0.9rem; }
+  </style>
 </head>
 <body>
 
@@ -18,6 +21,7 @@
       <nav class="site-nav">
         <a href="index.html">ホーム</a>
         <a href="articles.html" class="active">記事一覧</a>
+        <a href="admin.html">管理</a>
         <a href="about.html">About</a>
       </nav>
       <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">
@@ -30,46 +34,7 @@
   <main class="container">
     <div class="articles-index">
       <h1>記事一覧</h1>
-
-      <h2 id="mechanics">力学</h2>
-      <div class="article-list">
-        <article class="article-card">
-          <span class="article-tag">力学</span>
-          <h3><a href="articles/sample-newton.html">ニュートンの運動方程式を読み解く</a></h3>
-          <p>F = ma の意味を丁寧に掘り下げる。力・質量・加速度の関係を数式と図で整理。</p>
-          <time>2026-03-21</time>
-        </article>
-      </div>
-
-      <h2 id="electromagnetism">電磁気学</h2>
-      <div class="article-list">
-        <article class="article-card">
-          <span class="article-tag">電磁気学</span>
-          <h3><a href="articles/sample-maxwell.html">マクスウェル方程式の全体像</a></h3>
-          <p>4つの方程式が電磁気現象をどう記述するか、微分形と積分形を並べて解説。</p>
-          <time>2026-03-20</time>
-        </article>
-      </div>
-
-      <h2 id="thermodynamics">熱力学</h2>
-      <div class="article-list">
-        <p style="color: var(--text-secondary); font-size: 0.9rem;">記事準備中</p>
-      </div>
-
-      <h2 id="quantum">量子力学</h2>
-      <div class="article-list">
-        <p style="color: var(--text-secondary); font-size: 0.9rem;">記事準備中</p>
-      </div>
-
-      <h2 id="relativity">相対性理論</h2>
-      <div class="article-list">
-        <p style="color: var(--text-secondary); font-size: 0.9rem;">記事準備中</p>
-      </div>
-
-      <h2 id="math">数理物理</h2>
-      <div class="article-list">
-        <p style="color: var(--text-secondary); font-size: 0.9rem;">記事準備中</p>
-      </div>
+      <div id="articles-content"></div>
     </div>
   </main>
 
@@ -79,6 +44,10 @@
     </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/articles.js"></script>
 </body>
 </html>

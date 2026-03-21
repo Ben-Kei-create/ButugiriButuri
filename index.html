@@ -19,6 +19,7 @@
       <nav class="site-nav">
         <a href="index.html" class="active">ホーム</a>
         <a href="articles.html">記事一覧</a>
+        <a href="admin.html">管理</a>
         <a href="about.html">About</a>
       </nav>
       <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">
@@ -75,27 +76,11 @@
     </div>
   </section>
 
-  <!-- 最新記事（サンプル） -->
+  <!-- 最新記事 -->
   <section class="recent-articles">
     <div class="container">
       <h2 class="section-title">最新の記事</h2>
-      <div class="article-list">
-
-        <article class="article-card">
-          <span class="article-tag">力学</span>
-          <h3><a href="articles/sample-newton.html">ニュートンの運動方程式を読み解く</a></h3>
-          <p>F = ma の意味を丁寧に掘り下げる。力・質量・加速度の関係を数式と図で整理。</p>
-          <time>2026-03-21</time>
-        </article>
-
-        <article class="article-card">
-          <span class="article-tag">電磁気学</span>
-          <h3><a href="articles/sample-maxwell.html">マクスウェル方程式の全体像</a></h3>
-          <p>4つの方程式が電磁気現象をどう記述するか、微分形と積分形を並べて解説。</p>
-          <time>2026-03-20</time>
-        </article>
-
-      </div>
+      <div class="article-list" id="recent-articles-list"></div>
     </div>
   </section>
 
@@ -106,8 +91,10 @@
     </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/home.js"></script>
 </body>
 </html>

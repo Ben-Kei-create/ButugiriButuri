@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理画面 — ButugiriButuri</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    .admin-container { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; padding: 2rem 0; }
+    .admin-editor { display: flex; flex-direction: column; gap: 1rem; }
+    .admin-preview { border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; background: var(--card-bg); }
+    .form-group { display: flex; flex-direction: column; gap: 0.3rem; }
+    .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+    .form-group input, .form-group select, .form-group textarea { font-family: inherit; font-size: 1rem; padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; background: var(--card-bg); color: var(--text); }
+    .form-group textarea { resize: vertical; min-height: 300px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; }
+    .admin-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .btn { padding: 0.6rem 1.2rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+    .btn-primary { background: var(--accent); color: var(--bg); }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-secondary { background: var(--border); color: var(--text); }
+    .btn-secondary:hover { border-color: var(--text-secondary); }
+    .btn-success { background: #4ade80; color: #ffffff; }
+    .btn-success:hover { opacity: 0.9; }
+    .preview-header { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 1rem; text-transform: uppercase; }
+    .preview-content { font-size: 0.95rem; line-height: 1.7; }
+    .preview-content h1 { font-size: 1.8rem; font-weight: 700; margin: 1.5rem 0 0.5rem; }
+    .preview-content h2 { font-size: 1.3rem; font-weight: 600; margin: 1.2rem 0 0.5rem; }
+    .preview-content h3 { font-size: 1.1rem; font-weight: 600; margin: 1rem 0 0.4rem; }
+    .preview-content p { margin-bottom: 0.8rem; }
+    .preview-content code { font-size: 0.85em; background: var(--code-bg); padding: 0.2em 0.4em; border-radius: 3px; }
+    .preview-content pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; overflow-x: auto; margin: 1rem 0; }
+    .preview-content ul, .preview-content ol { margin: 0.8rem 0 0.8rem 1.5rem; }
+    .preview-content li { margin-bottom: 0.3rem; }
+    .articles-list { margin-top: 2rem; }
+    .articles-list h3 { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    .article-item { padding: 0.8rem; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
+    .article-item-info { flex: 1; }
+    .article-item-title { font-weight: 600; font-size: 0.95rem; }
+    .article-item-meta { font-size: 0.8rem; color: var(--text-secondary); }
+    .article-item-actions { display: flex; gap: 0.3rem; }
+    .btn-small { padding: 0.3rem 0.6rem; font-size: 0.75rem; }
+    .alert { padding: 0.8rem 1rem; border-radius: 6px; margin-bottom: 1rem; }
+    .alert-success { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    [data-theme="dark"] .alert-success { background: #064e3b; color: #86efac; }
+    [data-theme="dark"] .alert-error { background: #7f1d1d; color: #fca5a5; }
+    /* ツールバー */
+    .editor-toolbar { display: flex; gap: 0.3rem; flex-wrap: wrap; padding: 0.5rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 6px 6px 0 0; border-bottom: none; }
+    .toolbar-btn { padding: 0.3rem 0.5rem; border: 1px solid var(--border); border-radius: 4px; background: var(--card-bg); color: var(--text); cursor: pointer; font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; transition: all 0.15s; }
+    .toolbar-btn:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+    .toolbar-divider { width: 1px; background: var(--border); margin: 0 0.2rem; }
+    .form-group textarea.has-toolbar { border-radius: 0 0 6px 6px; }
+
+    /* モーダル */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
+    .modal-overlay.active { display: flex; }
+    .modal { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; max-width: 700px; width: 90vw; max-height: 80vh; overflow-y: auto; padding: 2rem; position: relative; }
+    .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary); line-height: 1; }
+    .modal-close:hover { color: var(--text); }
+    .modal h2 { font-size: 1.3rem; margin-bottom: 1.5rem; }
+    .cheatsheet-section { margin-bottom: 1.5rem; }
+    .cheatsheet-section h3 { font-size: 0.9rem; font-weight: 600; color: var(--accent); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .cheatsheet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.4rem; }
+    .cheatsheet-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-size: 0.8rem; transition: all 0.15s; }
+    .cheatsheet-item:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+    .cheatsheet-item .cs-preview { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-secondary); flex-shrink: 0; }
+    .cheatsheet-item:hover .cs-preview { color: inherit; opacity: 0.8; }
+    .cheatsheet-item .cs-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    @media (max-width: 1200px) {
+      .admin-container { grid-template-columns: 1fr; }
+      .admin-preview { min-height: 400px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="site-logo">ButugiriButuri</a>
+      <nav class="site-nav">
+        <a href="index.html">ホーム</a>
+        <a href="articles.html">記事一覧</a>
+        <a href="admin.html" class="active">管理画面</a>
+      </nav>
+      <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">
+        <span class="icon-sun">☀</span>
+        <span class="icon-moon">☽</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1 style="margin: 2rem 0 0.5rem; font-size: 2rem;">記事管理</h1>
+    <p style="color: var(--text-secondary); margin-bottom: 2rem;">記事を作成・編集できます。マークダウン形式で本文を入力してください。</p>
+
+    <div id="alert-container"></div>
+
+    <div class="admin-container">
+      <!-- エディタ -->
+      <div class="admin-editor">
+        <div class="form-group">
+          <label for="title">タイトル</label>
+          <input type="text" id="title" placeholder="例: 量子力学の基礎を学ぶ">
+        </div>
+
+        <div class="form-group">
+          <label for="category">カテゴリ</label>
+          <select id="category">
+            <option value="mechanics">力学</option>
+            <option value="electromagnetism">電磁気学</option>
+            <option value="thermodynamics">熱力学</option>
+            <option value="quantum">量子力学</option>
+            <option value="relativity">相対性理論</option>
+            <option value="math">数理物理</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="content">本文（マークダウン形式）</label>
+          <div class="editor-toolbar">
+            <button class="toolbar-btn" onclick="insertSnippet('## ', '')" title="見出し">H2</button>
+            <button class="toolbar-btn" onclick="insertSnippet('### ', '')" title="小見出し">H3</button>
+            <button class="toolbar-btn" onclick="insertWrap('**', '**')" title="太字">B</button>
+            <button class="toolbar-btn" onclick="insertWrap('*', '*')" title="イタリック"><i>I</i></button>
+            <button class="toolbar-btn" onclick="insertSnippet('- ', '')" title="リスト">・</button>
+            <button class="toolbar-btn" onclick="insertWrap('`', '`')" title="インラインコード">&lt;/&gt;</button>
+            <div class="toolbar-divider"></div>
+            <button class="toolbar-btn" onclick="insertWrap('$', '$')" title="インライン数式">$x$</button>
+            <button class="toolbar-btn" onclick="insertWrap('\n$$\n', '\n$$\n')" title="ブロック数式">$$x$$</button>
+            <button class="toolbar-btn" onclick="insertSnippet('\\frac{', '}{}')" title="分数">a/b</button>
+            <button class="toolbar-btn" onclick="insertSnippet('\\vec{', '}')" title="ベクトル">vec</button>
+            <button class="toolbar-btn" onclick="insertSnippet('\\int_{', '}^{} ')" title="積分">∫</button>
+            <button class="toolbar-btn" onclick="insertSnippet('\\sum_{', '}^{} ')" title="総和">∑</button>
+            <div class="toolbar-divider"></div>
+            <button class="toolbar-btn" onclick="openCheatsheet()" title="数式早見表" style="background: var(--accent); color: var(--bg); border-color: var(--accent);">📖 数式早見表</button>
+          </div>
+          <textarea id="content" class="has-toolbar" placeholder="## セクション&#10;&#10;テキスト&#10;&#10;数式: $E = mc^2$&#10;ブロック数式: $$\vec{F} = m\vec{a}$$"></textarea>
+        </div>
+
+        <div class="admin-buttons">
+          <button class="btn btn-primary" id="btn-save">💾 保存</button>
+          <button class="btn btn-secondary" id="btn-clear">🗑 クリア</button>
+          <button class="btn btn-secondary" id="btn-new">+ 新規</button>
+        </div>
+      </div>
+
+      <!-- プレビュー -->
+      <div class="admin-preview">
+        <div class="preview-header">プレビュー</div>
+        <div class="preview-content" id="preview"></div>
+      </div>
+    </div>
+
+    <!-- 記事一覧 -->
+    <div class="articles-list">
+      <h3>保存済み記事</h3>
+      <div id="articles-container"></div>
+    </div>
+  </main>
+
+  <!-- 数式早見表モーダル -->
+  <div class="modal-overlay" id="cheatsheet-modal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeCheatsheet()">&times;</button>
+      <h2>数式早見表 — クリックで挿入</h2>
+
+      <div class="cheatsheet-section">
+        <h3>基本演算</h3>
+        <div class="cheatsheet-grid">
+          <div class="cheatsheet-item" onclick="insertFromCS('\\frac{a}{b}')"><span class="cs-label">分数</span><span class="cs-preview">\frac{a}{b}</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('a^{2}')"><span class="cs-label">上付き</span><span class="cs-preview">a^{2}</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('a_{n}')"><span class="cs-label">下付き</span><span class="cs-preview">a_{n}</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\sqrt{x}')"><span class="cs-label">平方根</span><span class="cs-preview">\sqrt{x}</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\sqrt[3]{x}')"><span class="cs-label">立方根</span><span class="cs-preview">\sqrt[3]{x}</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\pm')"><span class="cs-label">プラスマイナス</span><span class="cs-preview">\pm</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\times')"><span class="cs-label">掛ける</span><span class="cs-preview">\times</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\cdot')"><span class="cs-label">ドット積</span><span class="cs-preview">\cdot</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\infty')"><span class="cs-label">無限大</span><span class="cs-preview">\infty</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\approx')"><span class="cs-label">近似</span><span class="cs-preview">\approx</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\neq')"><span class="cs-label">不等号</span><span class="cs-preview">\neq</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\leq')"><span class="cs-label">以下</span><span class="cs-preview">\leq</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\geq')"><span class="cs-label">以上</span><span class="cs-preview">\geq</span></div>
+        </div>
+      </div>
+
+      <div class="cheatsheet-section">
+        <h3>ベクトル・行列</h3>
+        <div class="cheatsheet-grid">
+          <div class="cheatsheet-item" onclick="insertFromCS('\\vec{F}')"><span class="cs-label">ベクトル</span><span class="cs-preview">\vec{F}</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\hat{x}')"><span class="cs-label">単位ベクトル</span><span class="cs-preview">\hat{x}</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\boldsymbol{F}')"><span class="cs-label">太字ベクトル</span><span class="cs-preview">\boldsymbol{F}</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\dot{x}')"><span class="cs-label">時間微分</span><span class="cs-preview">\dot{x}</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\ddot{x}')"><span class="cs-label">二階微分</span><span class="cs-preview">\ddot{x}</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}')"><span class="cs-label">行列</span><span class="cs-preview">pmatrix</span></div>
+        </div>
+      </div>
+
+      <div class="cheatsheet-section">
+        <h3>微積分</h3>
+        <div class="cheatsheet-grid">
+          <div class="cheatsheet-item" onclick="insertFromCS('\\frac{dy}{dx}')"><span class="cs-label">微分</span><span class="cs-preview">\frac{dy}{dx}</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\frac{\\partial f}{\\partial x}')"><span class="cs-label">偏微分</span><span class="cs-preview">\partial f/\partial x</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\int_{a}^{b} f(x)\\,dx')"><span class="cs-label">定積分</span><span class="cs-preview">\int_a^b</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\oint \\vec{B} \\cdot d\\vec{l}')"><span class="cs-label">線積分</span><span class="cs-preview">\oint</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\nabla \\cdot \\vec{E}')"><span class="cs-label">発散 div</span><span class="cs-preview">\nabla \cdot</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\nabla \\times \\vec{B}')"><span class="cs-label">回転 rot</span><span class="cs-preview">\nabla \times</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\nabla^2')"><span class="cs-label">ラプラシアン</span><span class="cs-preview">\nabla^2</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\sum_{n=1}^{\\infty} a_n')"><span class="cs-label">総和</span><span class="cs-preview">\sum</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\prod_{i=1}^{N} x_i')"><span class="cs-label">総積</span><span class="cs-preview">\prod</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\lim_{x \\to 0}')"><span class="cs-label">極限</span><span class="cs-preview">\lim</span></div>
+        </div>
+      </div>
+
+      <div class="cheatsheet-section">
+        <h3>ギリシャ文字</h3>
+        <div class="cheatsheet-grid">
+          <div class="cheatsheet-item" onclick="insertFromCS('\\alpha')"><span class="cs-label">alpha</span><span class="cs-preview">α</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\beta')"><span class="cs-label">beta</span><span class="cs-preview">β</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\gamma')"><span class="cs-label">gamma</span><span class="cs-preview">γ</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\delta')"><span class="cs-label">delta</span><span class="cs-preview">δ</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\epsilon')"><span class="cs-label">epsilon</span><span class="cs-preview">ε</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\theta')"><span class="cs-label">theta</span><span class="cs-preview">θ</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\lambda')"><span class="cs-label">lambda</span><span class="cs-preview">λ</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\mu')"><span class="cs-label">mu</span><span class="cs-preview">μ</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\pi')"><span class="cs-label">pi</span><span class="cs-preview">π</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\sigma')"><span class="cs-label">sigma</span><span class="cs-preview">σ</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\tau')"><span class="cs-label">tau</span><span class="cs-preview">τ</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\phi')"><span class="cs-label">phi</span><span class="cs-preview">φ</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\psi')"><span class="cs-label">psi</span><span class="cs-preview">ψ</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\omega')"><span class="cs-label">omega</span><span class="cs-preview">ω</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\hbar')"><span class="cs-label">h-bar</span><span class="cs-preview">ℏ</span></div>
+        </div>
+      </div>
+
+      <div class="cheatsheet-section">
+        <h3>括弧</h3>
+        <div class="cheatsheet-grid">
+          <div class="cheatsheet-item" onclick="insertFromCS('\\left( \\right)')"><span class="cs-label">丸括弧</span><span class="cs-preview">\left( \right)</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\left[ \\right]')"><span class="cs-label">角括弧</span><span class="cs-preview">\left[ \right]</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\left\\{ \\right\\}')"><span class="cs-label">波括弧</span><span class="cs-preview">\left\{ \right\}</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\left| \\right|')"><span class="cs-label">絶対値</span><span class="cs-preview">\left| \right|</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\left\\langle \\right\\rangle')"><span class="cs-label">ブラケット</span><span class="cs-preview">\langle \rangle</span></div>
+        </div>
+      </div>
+
+      <div class="cheatsheet-section">
+        <h3>物理テンプレート</h3>
+        <div class="cheatsheet-grid">
+          <div class="cheatsheet-item" onclick="insertFromCS('\\vec{F} = m\\vec{a}')"><span class="cs-label">ニュートン第二法則</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('E = mc^2')"><span class="cs-label">質量エネルギー</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('E = h\\nu = \\hbar\\omega')"><span class="cs-label">光子エネルギー</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('i\\hbar\\frac{\\partial}{\\partial t}\\Psi = \\hat{H}\\Psi')"><span class="cs-label">シュレーディンガー方程式</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('S = k_B \\ln \\Omega')"><span class="cs-label">ボルツマンの関係式</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\nabla \\cdot \\vec{E} = \\frac{\\rho}{\\varepsilon_0}')"><span class="cs-label">ガウスの法則</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\nabla \\times \\vec{B} = \\mu_0 \\vec{J} + \\mu_0 \\varepsilon_0 \\frac{\\partial \\vec{E}}{\\partial t}')"><span class="cs-label">アンペール-マクスウェル</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('L = T - V')"><span class="cs-label">ラグランジアン</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('\\frac{d}{dt}\\frac{\\partial L}{\\partial \\dot{q}} - \\frac{\\partial L}{\\partial q} = 0')"><span class="cs-label">オイラー-ラグランジュ</span></div>
+          <div class="cheatsheet-item" onclick="insertFromCS('ds^2 = -c^2 dt^2 + dx^2 + dy^2 + dz^2')"><span class="cs-label">ミンコフスキー計量</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 ButugiriButuri</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
