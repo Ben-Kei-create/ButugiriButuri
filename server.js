@@ -12,6 +12,8 @@ const COMMENTS_FILE = path.join(DATA_DIR, 'comments.json');
 const COMMENT_LIMITS = {
   authorLength: 32,
   bodyLength: 2000,
+  commentIdLength: 120,
+  deleteTokenLength: 160,
   unitIdLength: 120,
   sectionIdLength: 120,
   payloadBytes: 16 * 1024
@@ -123,6 +125,31 @@ function cleanBody(value) {
   return String(value || '').trim().slice(0, COMMENT_LIMITS.bodyLength);
 }
 
+function cleanDeleteToken(value) {
+  return String(value || '').trim().slice(0, COMMENT_LIMITS.deleteTokenLength);
+}
+
+function hashDeleteToken(token) {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+function createDeleteToken() {
+  return crypto.randomBytes(24).toString('base64url');
+}
+
+function sanitizeComment(comment) {
+  if (!comment || typeof comment !== 'object') {
+    return null;
+  }
+
+  return {
+    id: String(comment.id || ''),
+    author: String(comment.author || '匿名'),
+    body: String(comment.body || ''),
+    createdAt: String(comment.createdAt || new Date().toISOString())
+  };
+}
+
 function enforcePostRateLimit(request) {
   const ip = getClientIp(request);
   const now = Date.now();
@@ -146,7 +173,9 @@ function normalizeCommentsBySection(unitComments) {
   return Object.fromEntries(
     Object.entries(unitComments).map(([sectionId, comments]) => [
       sectionId,
-      Array.isArray(comments) ? comments : []
+      Array.isArray(comments)
+        ? comments.map(sanitizeComment).filter(Boolean)
+        : []
     ])
   );
 }
@@ -184,7 +213,7 @@ async function handleApi(request, response, url) {
   if (request.method === 'OPTIONS') {
     response.writeHead(204, {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+      'Access-Control-Allow-Methods': 'GET,POST,DELETE,OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type'
     });
     response.end();
@@ -241,11 +270,13 @@ async function handleApi(request, response, url) {
         return;
       }
 
+      const deleteToken = createDeleteToken();
       const comment = {
         id: crypto.randomUUID(),
         author,
         body,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        deleteTokenHash: hashDeleteToken(deleteToken)
       };
 
       if (!commentsStore[unitId]) {
@@ -259,7 +290,71 @@ async function handleApi(request, response, url) {
       commentsStore[unitId][sectionId].push(comment);
       await persistCommentsStore();
 
-      sendJson(response, 201, { ok: true, comment });
+      sendJson(response, 201, {
+        ok: true,
+        comment: sanitizeComment(comment),
+        deleteToken
+      });
+      return;
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        sendJson(response, 400, { error: 'JSON の形式が不正です。' });
+        return;
+      }
+
+      sendJson(response, error.statusCode || 500, {
+        error: error.message || 'コメント保存に失敗しました。'
+      });
+      return;
+    }
+  }
+
+  if (request.method === 'DELETE') {
+    try {
+      const rawBody = await readRequestBody(request);
+      const payload = JSON.parse(rawBody || '{}');
+
+      const unitId = cleanIdentifier(payload.unitId, COMMENT_LIMITS.unitIdLength);
+      const sectionId = cleanIdentifier(payload.sectionId, COMMENT_LIMITS.sectionIdLength);
+      const commentId = cleanIdentifier(payload.commentId, COMMENT_LIMITS.commentIdLength);
+      const deleteToken = cleanDeleteToken(payload.deleteToken);
+
+      if (!unitId || !sectionId || !commentId || !deleteToken) {
+        sendJson(response, 400, { error: 'unitId, sectionId, commentId, deleteToken が必要です。' });
+        return;
+      }
+
+      const sectionComments = commentsStore[unitId]?.[sectionId];
+      if (!Array.isArray(sectionComments)) {
+        sendJson(response, 404, { error: '補足コメントが見つかりません。' });
+        return;
+      }
+
+      const commentIndex = sectionComments.findIndex(comment => String(comment.id) === commentId);
+      if (commentIndex < 0) {
+        sendJson(response, 404, { error: '補足コメントが見つかりません。' });
+        return;
+      }
+
+      const comment = sectionComments[commentIndex];
+      if (!comment.deleteTokenHash || comment.deleteTokenHash !== hashDeleteToken(deleteToken)) {
+        sendJson(response, 403, { error: 'この補足コメントを削除する権限がありません。' });
+        return;
+      }
+
+      sectionComments.splice(commentIndex, 1);
+
+      if (sectionComments.length === 0) {
+        delete commentsStore[unitId][sectionId];
+      }
+
+      if (commentsStore[unitId] && Object.keys(commentsStore[unitId]).length === 0) {
+        delete commentsStore[unitId];
+      }
+
+      await persistCommentsStore();
+
+      sendJson(response, 200, { ok: true, commentId });
       return;
     } catch (error) {
       if (error instanceof SyntaxError) {

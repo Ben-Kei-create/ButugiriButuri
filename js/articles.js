@@ -3,6 +3,7 @@
 // ========================================
 
 const AUTHOR_KEY = 'butugiri_comment_author';
+const DELETE_KEYS_KEY = 'butugiri_comment_delete_keys';
 const COMMENTS_API_URL = '/api/comments';
 
 let currentUnit = null;
@@ -12,6 +13,7 @@ let sectionObserver = null;
 let commentsMode = 'loading';
 let sharedCommentsBySection = {};
 let isSubmittingComment = false;
+let isDeletingComment = false;
 
 function init() {
   marked.setOptions({ breaks: true, gfm: true });
@@ -314,6 +316,7 @@ function bindReaderEvents() {
   const jumpButtons = document.querySelectorAll('[data-section-jump]');
   const form = document.getElementById('comment-form');
   const authorInput = document.getElementById('comment-author');
+  const commentThread = document.getElementById('comment-thread');
 
   bindSectionTabEvents();
 
@@ -333,6 +336,16 @@ function bindReaderEvents() {
     form.addEventListener('submit', event => {
       event.preventDefault();
       void handleCommentSubmit();
+    });
+  }
+
+  if (commentThread) {
+    commentThread.addEventListener('click', event => {
+      const deleteButton = event.target.closest('[data-comment-delete]');
+      if (!deleteButton) return;
+
+      event.preventDefault();
+      void handleCommentDelete(deleteButton.dataset.commentDelete);
     });
   }
 }
@@ -412,13 +425,13 @@ function setCommentsMode(mode) {
 
   if (mode === 'shared') {
     if (pill) pill.textContent = '共有';
-    if (note) note.textContent = 'この単元の補足は共有保存され、他の閲覧者にも表示されます。';
+    if (note) note.textContent = 'この単元の補足は共有保存され、他の閲覧者にも表示されます。このブラウザから投稿した補足はあとで削除できます。';
     setCommentFormDisabled(false);
     return;
   }
 
   if (pill) pill.textContent = 'ローカル';
-  if (note) note.textContent = '共有サーバーに接続できなかったため、このブラウザにだけ保存します。';
+  if (note) note.textContent = '共有サーバーに接続できなかったため、このブラウザにだけ保存します。ローカル補足はあとで削除できます。';
   setCommentFormDisabled(false);
 }
 
@@ -500,6 +513,48 @@ function normalizeComment(rawComment) {
   };
 }
 
+function getDeleteKeysStore() {
+  const stored = localStorage.getItem(DELETE_KEYS_KEY);
+
+  if (!stored) return {};
+
+  try {
+    return JSON.parse(stored);
+  } catch (error) {
+    console.warn('Delete keys store is invalid:', error);
+    return {};
+  }
+}
+
+function setDeleteKey(unitId, sectionId, commentId, deleteToken) {
+  const store = getDeleteKeysStore();
+  store[unitId] = store[unitId] || {};
+  store[unitId][sectionId] = store[unitId][sectionId] || {};
+  store[unitId][sectionId][commentId] = deleteToken;
+  localStorage.setItem(DELETE_KEYS_KEY, JSON.stringify(store));
+}
+
+function getDeleteKey(unitId, sectionId, commentId) {
+  return getDeleteKeysStore()[unitId]?.[sectionId]?.[commentId] || null;
+}
+
+function removeDeleteKey(unitId, sectionId, commentId) {
+  const store = getDeleteKeysStore();
+  if (!store[unitId]?.[sectionId]?.[commentId]) return;
+
+  delete store[unitId][sectionId][commentId];
+
+  if (Object.keys(store[unitId][sectionId]).length === 0) {
+    delete store[unitId][sectionId];
+  }
+
+  if (Object.keys(store[unitId]).length === 0) {
+    delete store[unitId];
+  }
+
+  localStorage.setItem(DELETE_KEYS_KEY, JSON.stringify(store));
+}
+
 function getLocalCommentsStore() {
   const stored = localStorage.getItem(COMMENTS_KEY);
 
@@ -522,22 +577,32 @@ function getSectionComments(unitId, sectionId) {
   return store[unitId]?.[sectionId] || [];
 }
 
+function canDeleteComment(comment, sectionId = activeSectionId) {
+  if (!comment || !currentUnit || !sectionId) return false;
+  if (commentsMode === 'local') return true;
+
+  return Boolean(getDeleteKey(currentUnit.id, sectionId, comment.id));
+}
+
 function saveLocalComment(unitId, sectionId, author, body) {
   const store = getLocalCommentsStore();
   const unitComments = store[unitId] || {};
   const sectionComments = unitComments[sectionId] || [];
 
-  sectionComments.push({
+  const comment = {
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     author: author || '匿名',
     body,
     createdAt: new Date().toISOString()
-  });
+  };
+
+  sectionComments.push(comment);
 
   unitComments[sectionId] = sectionComments;
   store[unitId] = unitComments;
 
   localStorage.setItem(COMMENTS_KEY, JSON.stringify(store));
+  return comment;
 }
 
 async function saveSharedComment(unitId, sectionId, author, body) {
@@ -566,8 +631,69 @@ async function saveSharedComment(unitId, sectionId, author, body) {
     throw new Error('保存結果の形式が不正です');
   }
 
+  if (typeof payload.deleteToken === 'string' && payload.deleteToken.trim()) {
+    setDeleteKey(unitId, sectionId, comment.id, payload.deleteToken.trim());
+  }
+
   const sectionComments = sharedCommentsBySection[sectionId] || [];
   sharedCommentsBySection[sectionId] = [...sectionComments, comment];
+  return comment;
+}
+
+function deleteLocalComment(unitId, sectionId, commentId) {
+  const store = getLocalCommentsStore();
+  const sectionComments = store[unitId]?.[sectionId];
+
+  if (!Array.isArray(sectionComments)) {
+    throw new Error('補足コメントが見つかりません。');
+  }
+
+  const nextComments = sectionComments.filter(comment => String(comment.id) !== String(commentId));
+  if (nextComments.length === sectionComments.length) {
+    throw new Error('補足コメントが見つかりません。');
+  }
+
+  if (nextComments.length > 0) {
+    store[unitId][sectionId] = nextComments;
+  } else {
+    delete store[unitId][sectionId];
+  }
+
+  if (store[unitId] && Object.keys(store[unitId]).length === 0) {
+    delete store[unitId];
+  }
+
+  localStorage.setItem(COMMENTS_KEY, JSON.stringify(store));
+}
+
+async function deleteSharedComment(unitId, sectionId, commentId) {
+  const deleteToken = getDeleteKey(unitId, sectionId, commentId);
+  if (!deleteToken) {
+    throw new Error('このブラウザから投稿した補足だけ削除できます。');
+  }
+
+  const response = await fetch(COMMENTS_API_URL, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json'
+    },
+    body: JSON.stringify({
+      unitId,
+      sectionId,
+      commentId,
+      deleteToken
+    })
+  });
+
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(payload.error || '共有コメントの削除に失敗しました');
+  }
+
+  const sectionComments = sharedCommentsBySection[sectionId] || [];
+  sharedCommentsBySection[sectionId] = sectionComments.filter(comment => String(comment.id) !== String(commentId));
 }
 
 async function handleCommentSubmit() {
@@ -625,6 +751,49 @@ async function handleCommentSubmit() {
   }
 }
 
+async function handleCommentDelete(commentId) {
+  if (!currentUnit || !activeSectionId || !commentId || commentsMode === 'loading' || isDeletingComment) {
+    return;
+  }
+
+  const comment = getSectionComments(currentUnit.id, activeSectionId)
+    .find(entry => String(entry.id) === String(commentId));
+
+  if (!comment) {
+    setSubmitStatus('削除対象の補足コメントが見つかりません。', 'error');
+    return;
+  }
+
+  if (!canDeleteComment(comment, activeSectionId)) {
+    setSubmitStatus('このブラウザから投稿した補足だけ削除できます。', 'error');
+    return;
+  }
+
+  if (!window.confirm('この補足コメントを削除しますか？')) {
+    return;
+  }
+
+  isDeletingComment = true;
+  setSubmitStatus('補足を削除しています...', 'loading');
+
+  try {
+    if (commentsMode === 'shared') {
+      await deleteSharedComment(currentUnit.id, activeSectionId, commentId);
+    } else {
+      deleteLocalComment(currentUnit.id, activeSectionId, commentId);
+    }
+
+    removeDeleteKey(currentUnit.id, activeSectionId, commentId);
+    refreshSectionTabCounts();
+    activateSection(activeSectionId);
+    setSubmitStatus('補足コメントを削除しました。', 'success');
+  } catch (error) {
+    setSubmitStatus(error.message || '補足コメントの削除に失敗しました。', 'error');
+  } finally {
+    isDeletingComment = false;
+  }
+}
+
 function refreshSectionTabCounts() {
   const sectionTabs = document.getElementById('section-tabs');
   if (!sectionTabs || !currentUnit) return;
@@ -658,7 +827,18 @@ function renderCommentThread(comments) {
       <article class="comment-card">
         <div class="comment-card-meta">
           <strong>${escapeHtml(comment.author)}</strong>
-          <time>${new Date(comment.createdAt).toLocaleString('ja-JP')}</time>
+          <div class="comment-card-actions">
+            <time>${new Date(comment.createdAt).toLocaleString('ja-JP')}</time>
+            ${canDeleteComment(comment) ? `
+              <button
+                class="comment-delete-button"
+                type="button"
+                data-comment-delete="${escapeHtml(comment.id)}"
+              >
+                削除
+              </button>
+            ` : ''}
+          </div>
         </div>
         <div class="comment-card-body article-content">
           ${renderTextbookMarkdown(comment.body)}
