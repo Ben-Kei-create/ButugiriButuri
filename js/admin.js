@@ -77,6 +77,7 @@ function updatePreview() {
 
   previewDiv.innerHTML = html;
   renderMathWithin(previewDiv);
+  window.initMotionSystem?.(previewDiv);
 }
 
 // --- 単元保存 ---
@@ -198,6 +199,8 @@ function loadArticles() {
       </div>
     </div>
   `).join('');
+
+  window.initMotionSystem?.(articlesContainer);
 }
 
 // --- 単元をJSONとしてエクスポート ---
@@ -276,6 +279,10 @@ function insertWrap(open, close) {
   ta.selectionStart = start + open.length;
   ta.selectionEnd = start + open.length + selected.length;
   updatePreview();
+}
+
+function insertFigureTemplate() {
+  insertSnippet('\n:::figure 図のタイトル\n原因 -> 変化 -> 結果\ncaption: 図の補足を書けます。\n:::\n', '');
 }
 
 // 早見表からの挿入

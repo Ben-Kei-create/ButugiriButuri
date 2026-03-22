@@ -35,6 +35,7 @@ function renderRecentUnits() {
   }).join('');
 
   container.innerHTML = html;
+  window.initMotionSystem?.(container);
 }
 
 document.addEventListener('DOMContentLoaded', init);

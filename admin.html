@@ -166,6 +166,7 @@
             <button class="toolbar-btn" onclick="insertWrap('**', '**')" title="太字">B</button>
             <button class="toolbar-btn" onclick="insertWrap('*', '*')" title="イタリック"><i>I</i></button>
             <button class="toolbar-btn" onclick="insertSnippet('- ', '')" title="リスト">・</button>
+            <button class="toolbar-btn" onclick="insertFigureTemplate()" title="図版ブロック">図</button>
             <button class="toolbar-btn" onclick="insertWrap('`', '`')" title="インラインコード">&lt;/&gt;</button>
             <div class="toolbar-divider"></div>
             <button class="toolbar-btn" onclick="insertWrap('$', '$')" title="インライン数式">$x$</button>
@@ -179,11 +180,11 @@
             <button class="toolbar-btn" onclick="triggerAISuggest()" title="AIに数式を推測させる (Ctrl+Space)" id="btn-ai-suggest" style="border-color: #a78bfa; color: #a78bfa;">🤖 AI推測</button>
           </div>
           <div style="position: relative;">
-            <textarea id="content" class="has-toolbar" placeholder="## セクション&#10;&#10;テキストを書くと、キーワードから数式をサジェスト。&#10;Ctrl+Space でAI推測も使えます。&#10;&#10;例: 運動方程式は... → $F=ma$ をサジェスト&#10;用語リンク: [[遷移先単元]] または [[遷移先単元|表示名]]"></textarea>
+            <textarea id="content" class="has-toolbar" placeholder="## セクション&#10;&#10;テキストを書くと、キーワードから数式をサジェスト。&#10;Ctrl+Space でAI推測も使えます。&#10;&#10;例: 運動方程式は... → $F=ma$ をサジェスト&#10;用語リンク: [[遷移先単元]] または [[遷移先単元|表示名]]&#10;図版: :::figure 図のタイトル / 項目A -> 項目B / caption: 補足 / :::"></textarea>
             <div class="suggest-popup" id="suggest-popup"></div>
           </div>
           <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">
-            `##` 見出しごとに教科書の節として区切られます。用語リンクは `[[遷移先単元]]` か `[[遷移先単元|表示名]]` で書けます。
+            `##` 見出しごとに教科書の節として区切られます。用語リンクは `[[遷移先単元]]` か `[[遷移先単元|表示名]]`、図版は `:::figure` ブロックで書けます。
           </p>
         </div>
 

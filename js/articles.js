@@ -81,6 +81,8 @@ function renderUnitsIndex() {
       </section>
     `;
   }).join('');
+
+  window.initMotionSystem?.(unitsContainer);
 }
 
 function scrollToHashTarget() {
@@ -191,6 +193,7 @@ async function renderUnitView(unitId) {
 
   document.title = `${unit.title} — ButugiriButuri`;
   renderMathWithin(unitsContainer);
+  window.initMotionSystem?.(unitsContainer);
   bindReaderEvents();
   setCommentsMode('loading');
   activateSection(activeSectionId);

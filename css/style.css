@@ -61,6 +61,53 @@ body {
   flex-direction: column;
 }
 
+@keyframes heroRise {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  body.page-ready .hero h1,
+  body.page-ready .hero-sub {
+    opacity: 0;
+    animation: heroRise 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  body.page-ready .hero-sub {
+    animation-delay: 0.16s;
+  }
+
+  .motion-reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--motion-delay, 0ms);
+  }
+
+  .motion-reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-reveal,
+  .motion-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    animation: none;
+  }
+}
+
 /* --- Container --- */
 .container {
   max-width: 960px;
@@ -178,12 +225,13 @@ body {
   text-decoration: none;
   color: var(--text);
   background: var(--card-bg);
-  transition: box-shadow 0.2s, border-color 0.2s;
+  transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
 }
 
 .category-card:hover {
   box-shadow: var(--card-hover-shadow);
   border-color: var(--text-secondary);
+  transform: translateY(-2px);
 }
 
 .category-icon {
@@ -221,11 +269,12 @@ body {
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--card-bg);
-  transition: box-shadow 0.2s;
+  transition: box-shadow 0.2s, transform 0.2s;
 }
 
 .article-card:hover {
   box-shadow: var(--card-hover-shadow);
+  transform: translateY(-2px);
 }
 
 .article-tag {
@@ -700,6 +749,93 @@ pre code {
   border-radius: 12px;
   border: 1px solid var(--border);
   margin: 1.5rem 0;
+}
+
+.figure-block {
+  margin: 1.6rem 0;
+  padding: 1.15rem;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(127, 127, 127, 0.09), transparent 45%),
+    var(--bg-secondary);
+  box-shadow: var(--card-shadow);
+}
+
+.figure-meta {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.figure-title {
+  font-size: 1.02rem;
+  font-weight: 650;
+  margin-bottom: 0.9rem;
+}
+
+.figure-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.figure-flow-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.figure-node {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  font-weight: 600;
+  line-height: 1.4;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
+}
+
+.figure-arrow {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  transition: transform 0.24s ease, color 0.24s ease;
+}
+
+.figure-caption {
+  margin-top: 0.95rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border);
+}
+
+.figure-caption p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 0.45rem;
+}
+
+.figure-caption p:last-child {
+  margin-bottom: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .figure-block:hover .figure-node {
+    transform: translateY(-2px);
+    border-color: var(--text-secondary);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+  }
+
+  .figure-flow-row:hover .figure-arrow {
+    transform: translateX(3px);
+    color: var(--text);
+  }
 }
 
 .textbook-endcap {
