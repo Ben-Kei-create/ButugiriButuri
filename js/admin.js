@@ -2,11 +2,11 @@
 // Admin Editor
 // ========================================
 
-const DB_KEY = 'butugiri_articles';
-
 // DOM要素
 const titleInput = document.getElementById('title');
 const categorySelect = document.getElementById('category');
+const chapterInput = document.getElementById('chapter');
+const orderInput = document.getElementById('unit-order');
 const contentInput = document.getElementById('content');
 const previewDiv = document.getElementById('preview');
 const btnSave = document.getElementById('btn-save');
@@ -26,17 +26,32 @@ function init() {
 
   loadArticles();
   setupEventListeners();
+  clearForm();
 }
 
 // --- イベントリスナー設定 ---
 function setupEventListeners() {
   titleInput.addEventListener('input', updatePreview);
   contentInput.addEventListener('input', updatePreview);
-  categorySelect.addEventListener('change', updatePreview);
+  chapterInput.addEventListener('input', () => {
+    chapterInput.dataset.autoFilled = 'false';
+    updatePreview();
+  });
+  orderInput.addEventListener('input', updatePreview);
+  categorySelect.addEventListener('change', handleCategoryChange);
 
   btnSave.addEventListener('click', saveArticle);
   btnClear.addEventListener('click', clearForm);
   btnNew.addEventListener('click', newArticle);
+}
+
+function handleCategoryChange() {
+  if (!chapterInput.value.trim() || chapterInput.dataset.autoFilled === 'true') {
+    chapterInput.value = getDefaultChapter(categorySelect.value);
+    chapterInput.dataset.autoFilled = 'true';
+  }
+
+  updatePreview();
 }
 
 // --- マークダウン → HTML 変換 & プレビュー ---
@@ -44,44 +59,36 @@ function updatePreview() {
   const title = titleInput.value.trim();
   const content = contentInput.value.trim();
   const category = categorySelect.value;
+  const categoryName = CATEGORIES[category]?.name || category;
+  const chapter = chapterInput.value.trim() || getDefaultChapter(category);
+  const order = Number(orderInput.value) || 1;
 
   let html = '';
 
   if (title) {
     html += `<h1>${escapeHtml(title)}</h1>`;
-    html += `<p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem;">${escapeHtml(category)} / ${new Date().toLocaleDateString('ja-JP')}</p>`;
+    html += `<p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.35rem;">${escapeHtml(categoryName)} / ${new Date().toLocaleDateString('ja-JP')}</p>`;
+    html += `<p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1.5rem;">${escapeHtml(chapter)} / 単元 ${String(order).padStart(2, '0')}</p>`;
   }
 
   if (content) {
-    html += marked.parse(content);
+    html += renderTextbookMarkdown(content);
   }
 
   previewDiv.innerHTML = html;
-
-  // KaTeX レンダリング
-  if (typeof renderMathInElement === 'function') {
-    try {
-      renderMathInElement(previewDiv, {
-        delimiters: [
-          { left: '$$', right: '$$', display: true },
-          { left: '$', right: '$', display: false }
-        ],
-        throwOnError: false
-      });
-    } catch (e) {
-      console.warn('KaTeX error:', e);
-    }
-  }
+  renderMathWithin(previewDiv);
 }
 
-// --- 記事保存 ---
+// --- 単元保存 ---
 function saveArticle() {
   const title = titleInput.value.trim();
   const content = contentInput.value.trim();
   const category = categorySelect.value;
+  const chapter = chapterInput.value.trim() || getDefaultChapter(category);
+  const order = Number(orderInput.value) || 1;
 
   if (!title || !content) {
-    showAlert('タイトルと本文を入力してください', 'error');
+    showAlert('単元タイトルと本文を入力してください', 'error');
     return;
   }
 
@@ -92,12 +99,14 @@ function saveArticle() {
     id: currentEditId || `${Date.now()}`,
     title,
     category,
+    chapter,
+    order,
     content,
     date: currentEditId ? (articles.find(a => a.id === currentEditId)?.date || now) : now,
     updatedAt: now
   };
 
-  // 既存記事を更新、または新規追加
+  // 既存単元を更新、または新規追加
   const index = articles.findIndex(a => a.id === article.id);
   if (index >= 0) {
     articles[index] = article;
@@ -116,27 +125,30 @@ function clearForm() {
   titleInput.value = '';
   contentInput.value = '';
   categorySelect.value = 'mechanics';
+  chapterInput.value = getDefaultChapter('mechanics');
+  chapterInput.dataset.autoFilled = 'true';
+  orderInput.value = '1';
   currentEditId = null;
   previewDiv.innerHTML = '<p style="color: var(--text-secondary);">プレビューが表示されます...</p>';
 }
 
-// --- 新規記事作成 ---
+// --- 新規単元作成 ---
 function newArticle() {
   clearForm();
 }
 
-// --- 記事削除 ---
+// --- 単元削除 ---
 function deleteArticle(id) {
-  if (!confirm('この記事を削除しますか？')) return;
+  if (!confirm('この単元を削除しますか？')) return;
 
   let articles = getArticles();
   articles = articles.filter(a => a.id !== id);
   localStorage.setItem(DB_KEY, JSON.stringify(articles));
-  showAlert('記事を削除しました', 'success');
+  showAlert('単元を削除しました', 'success');
   loadArticles();
 }
 
-// --- 記事編集 ---
+// --- 単元編集 ---
 function editArticle(id) {
   const articles = getArticles();
   const article = articles.find(a => a.id === id);
@@ -146,6 +158,9 @@ function editArticle(id) {
   titleInput.value = article.title;
   contentInput.value = article.content;
   categorySelect.value = article.category;
+  chapterInput.value = article.chapter || getDefaultChapter(article.category);
+  chapterInput.dataset.autoFilled = 'false';
+  orderInput.value = String(article.order || 1);
   currentEditId = id;
   updatePreview();
 
@@ -153,48 +168,39 @@ function editArticle(id) {
   titleInput.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// --- DB から記事読み込み ---
+// --- DB から単元読み込み ---
 function getArticles() {
   const data = localStorage.getItem(DB_KEY);
   return data ? JSON.parse(data) : [];
 }
 
-// --- 記事一覧表示 ---
+// --- 単元一覧表示 ---
 function loadArticles() {
-  const articles = getArticles().sort((a, b) => new Date(b.date) - new Date(a.date));
+  const articles = sortUnitsForReading(getArticles().map((article, index) => normalizeUnit(article, index)));
 
   if (articles.length === 0) {
-    articlesContainer.innerHTML = '<p style="color: var(--text-secondary);">記事がまだありません</p>';
+    articlesContainer.innerHTML = '<p style="color: var(--text-secondary);">単元がまだありません</p>';
     return;
   }
-
-  const categoryNames = {
-    mechanics: '力学',
-    electromagnetism: '電磁気学',
-    thermodynamics: '熱力学',
-    quantum: '量子力学',
-    relativity: '相対性理論',
-    math: '数理物理'
-  };
 
   articlesContainer.innerHTML = articles.map(article => `
     <div class="article-item">
       <div class="article-item-info">
         <div class="article-item-title">${escapeHtml(article.title)}</div>
         <div class="article-item-meta">
-          ${categoryNames[article.category]} • ${new Date(article.date).toLocaleDateString('ja-JP')}
+          ${escapeHtml(article.chapter)} • 単元 ${String(article.order).padStart(2, '0')} • ${CATEGORIES[article.category]?.name || article.category}
         </div>
       </div>
       <div class="article-item-actions">
         <button class="btn btn-secondary btn-small" onclick="editArticle('${article.id}')">✎ 編集</button>
         <button class="btn btn-secondary btn-small" onclick="deleteArticle('${article.id}')">✕ 削除</button>
-        <button class="btn btn-secondary btn-small" onclick="exportArticle('${article.id}')">⬇ 公開</button>
+        <button class="btn btn-secondary btn-small" onclick="exportArticle('${article.id}')">⬇ JSON出力</button>
       </div>
     </div>
   `).join('');
 }
 
-// --- 記事をJSONとしてエクスポート（公開用） ---
+// --- 単元をJSONとしてエクスポート ---
 function exportArticle(id) {
   const articles = getArticles();
   const article = articles.find(a => a.id === id);
@@ -212,7 +218,7 @@ function exportArticle(id) {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 
-  showAlert('記事をエクスポートしました（JSON形式）', 'success');
+  showAlert('単元をエクスポートしました（JSON形式）', 'success');
 }
 
 // --- アラート表示 ---

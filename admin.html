@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>管理画面 — ButugiriButuri</title>
+  <title>単元管理 — ButugiriButuri</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -110,7 +110,7 @@
       <a href="index.html" class="site-logo">ButugiriButuri</a>
       <nav class="site-nav">
         <a href="index.html">ホーム</a>
-        <a href="articles.html">記事一覧</a>
+        <a href="articles.html">単元一覧</a>
         <a href="admin.html" class="active">管理画面</a>
       </nav>
       <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">
@@ -121,8 +121,8 @@
   </header>
 
   <main class="container">
-    <h1 style="margin: 2rem 0 0.5rem; font-size: 2rem;">記事管理</h1>
-    <p style="color: var(--text-secondary); margin-bottom: 2rem;">記事を作成・編集できます。マークダウン形式で本文を入力してください。</p>
+    <h1 style="margin: 2rem 0 0.5rem; font-size: 2rem;">単元管理</h1>
+    <p style="color: var(--text-secondary); margin-bottom: 2rem;">教科書の単元を作成・編集できます。マークダウン形式で本文を入力してください。</p>
 
     <div id="alert-container"></div>
 
@@ -130,7 +130,7 @@
       <!-- エディタ -->
       <div class="admin-editor">
         <div class="form-group">
-          <label for="title">タイトル</label>
+          <label for="title">単元タイトル</label>
           <input type="text" id="title" placeholder="例: 量子力学の基礎を学ぶ">
         </div>
 
@@ -144,6 +144,18 @@
             <option value="relativity">相対性理論</option>
             <option value="math">数理物理</option>
           </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: minmax(0, 1fr) 140px; gap: 1rem;">
+          <div class="form-group">
+            <label for="chapter">章名</label>
+            <input type="text" id="chapter" placeholder="例: 第1章 力と運動のつながり">
+          </div>
+
+          <div class="form-group">
+            <label for="unit-order">単元順</label>
+            <input type="number" id="unit-order" min="1" step="1" placeholder="1">
+          </div>
         </div>
 
         <div class="form-group">
@@ -167,9 +179,12 @@
             <button class="toolbar-btn" onclick="triggerAISuggest()" title="AIに数式を推測させる (Ctrl+Space)" id="btn-ai-suggest" style="border-color: #a78bfa; color: #a78bfa;">🤖 AI推測</button>
           </div>
           <div style="position: relative;">
-            <textarea id="content" class="has-toolbar" placeholder="## セクション&#10;&#10;テキストを書くと、キーワードから数式をサジェスト。&#10;Ctrl+Space でAI推測も使えます。&#10;&#10;例: 運動方程式は... → $F=ma$ をサジェスト"></textarea>
+            <textarea id="content" class="has-toolbar" placeholder="## セクション&#10;&#10;テキストを書くと、キーワードから数式をサジェスト。&#10;Ctrl+Space でAI推測も使えます。&#10;&#10;例: 運動方程式は... → $F=ma$ をサジェスト&#10;用語リンク: [[遷移先単元]] または [[遷移先単元|表示名]]"></textarea>
             <div class="suggest-popup" id="suggest-popup"></div>
           </div>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">
+            `##` 見出しごとに教科書の節として区切られます。用語リンクは `[[遷移先単元]]` か `[[遷移先単元|表示名]]` で書けます。
+          </p>
         </div>
 
         <details class="ai-settings">
@@ -200,9 +215,9 @@
       </div>
     </div>
 
-    <!-- 記事一覧 -->
+    <!-- 単元一覧 -->
     <div class="articles-list">
-      <h3>保存済み記事</h3>
+      <h3>保存済み単元</h3>
       <div id="articles-container"></div>
     </div>
   </main>
@@ -320,6 +335,7 @@
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/content.js"></script>
   <script src="js/admin.js"></script>
 </body>
 </html>

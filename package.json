@@ -1,0 +1,7 @@
+{
+  "name": "butugiri-buturi",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  }
+}
